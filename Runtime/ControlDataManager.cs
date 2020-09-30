@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using FMOD;
 using UnityEngine;
 using UnityEditor;
+using Debug = UnityEngine.Debug;
 
 namespace SoundActor
 {
@@ -18,8 +20,8 @@ namespace SoundActor
         public Animator animator;
 
         private float _lastExecTime = 0f;
-        private float timeThreshold = 0.02f; //50fps
-        private GameObject _dataDisplayParent;
+        private float _timeThreshold = 0.02f; //50fps
+        private float _fmodExectime;
 
         private void Awake()
         {
@@ -30,9 +32,6 @@ namespace SoundActor
         {
             _instance = FMODUnity.RuntimeManager.CreateInstance(fmodEvent);
             _instance.start();
-
-            _dataDisplayParent = GameObject.FindGameObjectWithTag("DataDisplay");
-            if (!_dataDisplayParent) Debug.LogError("Canvas object with DataDisplay tag set could not be found. No info on data values can be shown. Add canvas element with 'Vertical Layout Group' component and set its tag to DataDisplay.");
         }
 
 
@@ -86,7 +85,8 @@ namespace SoundActor
                 acp.fmodParameterValue = value;
             }
             //set the data on fmod
-            _instance.setParameterByName(acp.m_fmodParameter, acp.fmodParameterValue );
+            FMOD.RESULT _result = _instance.setParameterByName(acp.m_fmodParameter, acp.fmodParameterValue );
+            //Debug.Assert(_result == RESULT.OK, "Couldn't set the volume");
         }
 
         private Texture2D MakeTex(int width, int height, Color col)
@@ -129,15 +129,16 @@ namespace SoundActor
 
         private void Update()
         {
-            foreach (AudioControlPoint acp in controlPoints)
+            if (Time.time - _lastExecTime > _timeThreshold)
             {
-                if (Time.time - _lastExecTime > timeThreshold)
-                { // let's throttle a bit the not so optimized loops
+                foreach (AudioControlPoint acp in controlPoints)
+                {
+                    // let's throttle a bit the not so optimized loops
                     if (acp.m_controlType == ControlDataType.OSC && acp.m_active) SendOSC(acp);
                     if (acp.m_controlType == ControlDataType.FMODEvent && acp.m_active) UpdateFMOD(acp);
                 }
+                _lastExecTime = Time.time;
             }
-            _lastExecTime = Time.time;
         }
     
     }

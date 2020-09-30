@@ -1,0 +1,15 @@
+{
+    "name": "SoundActor",
+    "references": [
+        "GUID:f8bcdcc0835e34c9491e9fd4b9939664"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
