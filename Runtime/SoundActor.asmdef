@@ -1,7 +1,7 @@
 {
     "name": "SoundActor",
     "references": [
-        "GUID:f8bcdcc0835e34c9491e9fd4b9939664"
+        "FMODUnity"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
