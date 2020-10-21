@@ -17,6 +17,12 @@ public enum ArgumentType
     Distance
 }
 
+public enum DistanceTo
+{
+    JointToJoint,
+    JointToObject
+}
+
 public enum Axis
 {
     x,

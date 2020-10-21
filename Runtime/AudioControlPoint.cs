@@ -12,9 +12,11 @@ namespace SoundActor
         public string m_fmodParameter = "";
         public ArgumentType m_argumentType = ArgumentType.Position;
         public Axis m_axis = Axis.x;
+        public DistanceTo m_distanceTo = DistanceTo.JointToJoint;
         public HumanBodyBones m_bonePoint = HumanBodyBones.Neck;
         public HumanBodyBones m_bonePointFrom = HumanBodyBones.LeftHand;
         public HumanBodyBones m_bonePointTo = HumanBodyBones.RightHand;
+        public GameObject m_distanceToGameObject;
         public ControlDataManager cds; //reference to the object holding the control point
         public Color m_drawColor = Color.red;
         public Vector3 previousPosition = Vector3.zero;

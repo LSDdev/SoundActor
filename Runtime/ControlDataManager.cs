@@ -77,12 +77,22 @@ namespace SoundActor
                 value = acp.velocityMagnitude();
                 //acp.fmodParameterValue = Mathf.Abs(value);
                 acp.fmodParameterValue = value;
-            } else
+            } else if (acp.m_argumentType == ArgumentType.Distance)
             {
-                value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, animator.GetBoneTransform(acp.m_bonePointTo).position);
-                acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
-                //acp.fmodParameterValue = Mathf.Abs(value);
-                acp.fmodParameterValue = value;
+                if (acp.m_distanceTo == DistanceTo.JointToJoint)
+                {
+                    value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, animator.GetBoneTransform(acp.m_bonePointTo).position);
+                    acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
+                    //acp.fmodParameterValue = Mathf.Abs(value);
+                    acp.fmodParameterValue = value;
+                } else if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.JointToObject)
+                {
+                    value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, acp.m_distanceToGameObject.transform.position);
+                    acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
+                    //acp.fmodParameterValue = Mathf.Abs(value);
+                    acp.fmodParameterValue = value;
+                }
+                
             }
             //set the data on fmod
             FMOD.RESULT _result = _instance.setParameterByName(acp.m_fmodParameter, acp.fmodParameterValue );
@@ -116,12 +126,27 @@ namespace SoundActor
                 }
                 if (acp.m_visualizeBonePoint && acp.m_argumentType == ArgumentType.Distance && acp.m_active)
                 {
+                    Vector3 p1, p2 = Vector3.zero;
                     Gizmos.color = acp.m_drawColor;
-                    Gizmos.DrawSphere(animator.GetBoneTransform(acp.m_bonePointFrom).position, .03f);
-                    Gizmos.DrawSphere(animator.GetBoneTransform(acp.m_bonePointTo).position, .03f);
-                    var p1 = animator.GetBoneTransform(acp.m_bonePointFrom).position;
-                    var p2 = animator.GetBoneTransform(acp.m_bonePointTo).position;
-                    Handles.DrawBezier(p1, p2, p1, p2, acp.m_drawColor, null, 8f);
+                    
+                    p1 = animator.GetBoneTransform(acp.m_bonePointFrom).position;
+                    Gizmos.DrawSphere(p1, .03f);
+                    
+                    if (acp.m_distanceTo == DistanceTo.JointToJoint)
+                    {
+                        p2 = animator.GetBoneTransform(acp.m_bonePointTo).position;
+                        Gizmos.DrawSphere(p2, .03f);
+                    } 
+                    else if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.JointToObject)
+                    {
+                        p2 = acp.m_distanceToGameObject.transform.position;
+                        Gizmos.DrawSphere(p2, .03f);
+                    }
+
+                    if (acp.m_distanceToGameObject != null)  // make sure GO is assigned
+                    {
+                        Handles.DrawBezier(p1, p2, p1, p2, acp.m_drawColor, null, 8f);    
+                    }
                 }
 
             }

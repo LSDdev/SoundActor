@@ -1,4 +1,5 @@
-﻿using SoundActor;
+﻿using FMOD.Studio;
+using SoundActor;
 using UnityEngine;
 using UnityEditor;
 
@@ -78,15 +79,27 @@ public class ControlDataSenderEditor : Editor
 
             if (acpoint.m_foldout) {
                 EditorGUILayout.BeginVertical("box");
+                
+                // OSC SETUP
                 if (acpoint.m_controlType == ControlDataType.OSC) {
                     EditorGUILayout.BeginVertical();
                         acpoint.m_oscCommand = EditorGUILayout.TextField("OSC commmand", acpoint.m_oscCommand);
                         acpoint.m_argumentType = (ArgumentType)EditorGUILayout.EnumPopup("Command data", acpoint.m_argumentType);
                         if (acpoint.m_argumentType == ArgumentType.Distance) {
+                            acpoint.m_distanceTo = (DistanceTo) EditorGUILayout.EnumPopup("Distance between:", acpoint.m_distanceTo);
                             EditorGUILayout.BeginHorizontal();
-                                EditorGUILayout.LabelField("Distance between:", GUILayout.MaxWidth(125));
+                            if (acpoint.m_distanceTo == DistanceTo.JointToJoint)
+                            {
+                                EditorGUILayout.LabelField("", GUILayout.MaxWidth(125));
                                 acpoint.m_bonePointFrom = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointFrom, GUILayout.ExpandWidth(true));
                                 acpoint.m_bonePointTo = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointTo, GUILayout.ExpandWidth(true));
+                            } 
+                            else if (acpoint.m_distanceTo == DistanceTo.JointToObject)
+                            {
+                                EditorGUILayout.LabelField("", GUILayout.MaxWidth(125));
+                                acpoint.m_bonePointFrom = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointFrom, GUILayout.ExpandWidth(true));
+                                acpoint.m_distanceToGameObject = (GameObject)EditorGUILayout.ObjectField(acpoint.m_distanceToGameObject, typeof(GameObject), true);
+                            }
                             EditorGUILayout.EndHorizontal();
                         } else
                         {
@@ -95,10 +108,13 @@ public class ControlDataSenderEditor : Editor
                     EditorGUILayout.EndVertical();
 
                 }
+                
+                // FMOD SETUP
                 if (acpoint.m_controlType == ControlDataType.FMODEvent) {
                     EditorGUILayout.BeginVertical();
                     m_target.fmodEvent = (string)EditorGUILayout.TextField("Shared fmod event:", m_target.fmodEvent); 
                     acpoint.m_fmodParameter = (string)EditorGUILayout.TextField("Controlled fmod parameter:", acpoint.m_fmodParameter);
+                    EditorGUILayout.Space(10);
                     acpoint.m_argumentType = (ArgumentType)EditorGUILayout.EnumPopup("Value from:", acpoint.m_argumentType);
                         if(acpoint.m_argumentType == ArgumentType.Position)
                         {
@@ -113,13 +129,24 @@ public class ControlDataSenderEditor : Editor
                         }
                     
                 if (acpoint.m_argumentType == ArgumentType.Distance)
-                        {
-                            EditorGUILayout.BeginHorizontal();
-                            EditorGUILayout.LabelField("Distance between:", GUILayout.MaxWidth(125));
-                            acpoint.m_bonePointFrom = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointFrom, GUILayout.ExpandWidth(true));
-                            acpoint.m_bonePointTo = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointTo, GUILayout.ExpandWidth(true));
-                            EditorGUILayout.EndHorizontal();
-                        }
+                {
+                    acpoint.m_distanceTo = (DistanceTo) EditorGUILayout.EnumPopup("Distance between:", acpoint.m_distanceTo);
+                    if (acpoint.m_distanceTo == DistanceTo.JointToJoint)
+                    {
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.LabelField("Distance between:", GUILayout.MaxWidth(125));
+                        acpoint.m_bonePointFrom = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointFrom, GUILayout.ExpandWidth(true));
+                        acpoint.m_bonePointTo = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointTo, GUILayout.ExpandWidth(true));
+                        EditorGUILayout.EndHorizontal();
+                    } else if (acpoint.m_distanceTo == DistanceTo.JointToObject)
+                    {
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.LabelField("From joint to object:", GUILayout.MaxWidth(125));
+                        acpoint.m_bonePointFrom = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointFrom, GUILayout.ExpandWidth(true));
+                        acpoint.m_distanceToGameObject = (GameObject)EditorGUILayout.ObjectField(acpoint.m_distanceToGameObject, typeof(GameObject), true);
+                        EditorGUILayout.EndHorizontal();
+                    }
+                }
                 EditorGUILayout.EndVertical();
                 }
 
