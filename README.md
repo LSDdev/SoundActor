@@ -31,5 +31,9 @@ Currently SoundActor requires the following
 * 2019.3 or later
 * [FMODUnity integration package](https://assetstore.unity.com/packages/tools/audio/fmod-for-unity-161631)
 * [FMOD Studio](https://www.fmod.com)
-* (optional) Some OSC capable sound source 
+
+If you intend send out data as OSC messages you also need
+* [OscJack](https://github.com/keijiro/OscJack) 
+* Some OSC capable sound source 
+
 

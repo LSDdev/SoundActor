@@ -54,7 +54,7 @@ namespace SoundActor
         public bool m_active = true;
 
         //FIXME: these are for the unity inspector editor system, should be refactored out of here
-        public bool m_foldout = false;
+        public bool m_foldout = true;
         public bool m_visualizeBonePoint = false;
         public bool m_showValue = false;
 
