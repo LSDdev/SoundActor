@@ -10,7 +10,7 @@ using Debug = UnityEngine.Debug;
 namespace SoundActor
 {
     [ExecuteInEditMode]
-    public class ControlDataManager : MonoBehaviour
+    public class AudioControlPointController : MonoBehaviour
     {
         private FMOD.Studio.EventInstance _instance;
         [HideInInspector]

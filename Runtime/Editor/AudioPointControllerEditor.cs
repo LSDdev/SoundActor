@@ -4,14 +4,14 @@ using SoundActor;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor (typeof(ControlDataManager))]
-public class ControlDataSenderEditor : Editor
+[CustomEditor (typeof(AudioControlPointController))]
+public class AudioPointControllerEditor : Editor
 {
-    ControlDataManager m_target;
+    AudioControlPointController m_target;
 
     public override void OnInspectorGUI()
     {
-        m_target = (ControlDataManager)target;
+        m_target = (AudioControlPointController)target;
         //base.OnInspectorGUI();
         
         EditorGUILayout.Space(8);
