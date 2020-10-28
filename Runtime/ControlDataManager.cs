@@ -20,6 +20,8 @@ namespace SoundActor
         [HideInInspector]
         public int oscPort;
         [HideInInspector]
+        public OutputChoice m_outputChoice;
+        [HideInInspector]
         public bool m_connectionFoldout = true;
         [HideInInspector]
         public bool m_controlPointsFoldout = true;
@@ -32,6 +34,9 @@ namespace SoundActor
         private float _timeThreshold = 0.02f; //50fps
         private float _fmodExectime;
         private OscClient _client;
+
+        private Dictionary<string, List<AudioControlPoint>> _fmodPointsByAttribute = new Dictionary<string, List<AudioControlPoint>>();
+        private Dictionary<string, List<AudioControlPoint>> _oscPointsByCommand = new Dictionary<string, List<AudioControlPoint>>();
         
         
         private void Awake()
@@ -53,65 +58,7 @@ namespace SoundActor
             }
         }
 
-
-        void SendOSC(AudioControlPoint acp)  //NEED TO REFACTOR THE PART BELOW TOGETHER WITH FMOD
-        {
-             Vector3 currentPos = animator.GetBoneTransform(acp.m_bonePoint).position;
-            float value = 0;
-            if (acp.m_argumentType == ArgumentType.Position)
-            {
-                switch (acp.m_axis)
-                {
-                    case Axis.x:
-                        value = animator.GetBoneTransform(acp.m_bonePoint).position.x;
-                        acp.positionOnSelectedAxis = value; //store the result into instance for reuse in other parts of GUI drawing
-                        //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
-                        break;
-                    case Axis.y:
-                        value = animator.GetBoneTransform(acp.m_bonePoint).position.y;
-                        acp.positionOnSelectedAxis = value;
-                        //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
-                        break;
-                    case Axis.z:
-                        value = animator.GetBoneTransform(acp.m_bonePoint).position.z;
-                        acp.positionOnSelectedAxis = value;
-                        //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
-                        break;
-                    default:
-                        break;
-                }
-            } else if (acp.m_argumentType == ArgumentType.Velocity)
-            {
-                Vector3 currFrameVelocity = (currentPos - acp.previousPosition) / Time.deltaTime;
-                acp.frameVelocity = Vector3.Lerp(acp.frameVelocity, currFrameVelocity, 0.1f);
-                acp.previousPosition = currentPos;
-                value = acp.velocityMagnitude();
-                //acp.fmodParameterValue = Mathf.Abs(value);
-                acp.fmodParameterValue = value;
-            } else if (acp.m_argumentType == ArgumentType.Distance)
-            {
-                if (acp.m_distanceTo == DistanceTo.JointToJoint)
-                {
-                    value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, animator.GetBoneTransform(acp.m_bonePointTo).position);
-                    acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
-                    //acp.fmodParameterValue = Mathf.Abs(value);
-                    acp.fmodParameterValue = value;
-                } else if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.JointToObject)
-                {
-                    value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, acp.m_distanceToGameObject.transform.position);
-                    acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
-                    //acp.fmodParameterValue = Mathf.Abs(value);
-                    acp.fmodParameterValue = value;
-                }
-            }
-
-            _client.Send(acp.m_oscCommand, acp.fmodParameterValue); 
-        }
-
-        void UpdateFMOD(AudioControlPoint acp)
+        void UpdateValue(AudioControlPoint acp)
         {
             Vector3 currentPos = animator.GetBoneTransform(acp.m_bonePoint).position;
             float value = 0;
@@ -165,11 +112,101 @@ namespace SoundActor
                 }
                 
             }
-            //set the data on fmod
-            FMOD.RESULT _result = _instance.setParameterByName(acp.m_fmodParameter, acp.fmodParameterValue );
-            //Debug.Assert(_result == RESULT.OK, "Couldn't set the volume");
         }
 
+ 
+
+        public void AddNewControlPoint()
+        {
+            AudioControlPoint acp = new AudioControlPoint();
+            controlPoints.Add(acp);
+        }
+
+        private void Update()
+        {
+            if (Time.time - _lastExecTime > _timeThreshold)   //throttle the data output
+            {
+                IterateControlPoints();
+                SendData(_fmodPointsByAttribute);
+                SendData(_oscPointsByCommand);
+                _lastExecTime = Time.time;
+            }
+        }
+
+        private void SendData(Dictionary<string,List<AudioControlPoint>> pointDict)
+        {
+            foreach (KeyValuePair<string,List<AudioControlPoint>> entry in pointDict)
+            {
+                var attributeOrCommand = entry.Key;
+                var size = entry.Value.Count;
+                float cumulativeValue = 0f;
+                float maxValue = 0f;
+                foreach (var point in entry.Value)
+                {
+                    UpdateValue(point);
+                    cumulativeValue += point.fmodParameterValue;
+                    maxValue = point.fmodParameterValue > maxValue ? point.fmodParameterValue : maxValue;
+                }
+                
+                //determine the final value for output
+                float outValue = m_outputChoice == OutputChoice.MaxValue ? maxValue : cumulativeValue / size;
+                
+                //FMOD or OSC
+                if (Application.isPlaying)
+                {
+                    if (entry.Value[0].m_controlType == ControlDataType.FMODEvent)
+                    {
+                        FMOD.RESULT _result = _instance.setParameterByName(attributeOrCommand, outValue);    
+                    } else if (entry.Value[0].m_controlType == ControlDataType.OSC)
+                    {
+                        _client.Send(attributeOrCommand, outValue); 
+                    }
+                }
+            }
+            pointDict.Clear();
+        }
+
+        private void IterateControlPoints()
+        {
+            foreach (AudioControlPoint acp in controlPoints) 
+            {
+                //this is bit inefficient but doesn't matter now in this context
+                //create audio control point groupings based on point's current fmod attribute or OSC command
+                //use own list for each type, fmod or osc
+                if (acp.m_controlType == ControlDataType.FMODEvent)
+                {
+                    //is this first occurrance of this fmod attribute as a key in dict
+                    if (!_fmodPointsByAttribute.ContainsKey(acp.m_fmodParameter))
+                    {
+                        var list = new List<AudioControlPoint>();
+                        list.Add(acp);
+                        _fmodPointsByAttribute[acp.m_fmodParameter] = list;
+                    }
+                    else
+                    {
+                        var list = _fmodPointsByAttribute[acp.m_fmodParameter];
+                        list.Add(acp);
+                        _fmodPointsByAttribute[acp.m_fmodParameter] = list;
+                    }
+                } else if (acp.m_controlType == ControlDataType.OSC)
+                {
+                    //is this first occurrance of this OSC command as a key in dict
+                    if (!_oscPointsByCommand.ContainsKey(acp.m_oscCommand))
+                    {
+                        var list = new List<AudioControlPoint>();
+                        list.Add(acp);
+                        _oscPointsByCommand[acp.m_oscCommand] = list;
+                    }
+                    else
+                    {
+                        var list = _oscPointsByCommand[acp.m_oscCommand];
+                        list.Add(acp);
+                        _oscPointsByCommand[acp.m_oscCommand] = list;
+                    }       
+                } 
+            }
+        }
+        
         private Texture2D MakeTex(int width, int height, Color col)
         {
             Color[] pix = new Color[width * height];
@@ -219,23 +256,7 @@ namespace SoundActor
                         Handles.DrawBezier(p1, p2, p1, p2, acp.m_drawColor, null, 8f);    
                     }
                 }
-
             }
         }
-
-        private void Update()
-        {
-            if (Time.time - _lastExecTime > _timeThreshold)
-            {
-                foreach (AudioControlPoint acp in controlPoints)
-                {
-                    // let's throttle a bit the not so optimized loops
-                    if (acp.m_controlType == ControlDataType.OSC && acp.m_active) SendOSC(acp);
-                    if (acp.m_controlType == ControlDataType.FMODEvent && acp.m_active) UpdateFMOD(acp);
-                }
-                _lastExecTime = Time.time;
-            }
-        }
-    
     }
 }

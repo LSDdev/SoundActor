@@ -17,7 +17,7 @@ namespace SoundActor
         public HumanBodyBones m_bonePointFrom = HumanBodyBones.LeftHand;
         public HumanBodyBones m_bonePointTo = HumanBodyBones.RightHand;
         public GameObject m_distanceToGameObject;
-        public ControlDataManager cds; //reference to the object holding the control point
+        //public ControlDataManager cds; //reference to the object holding the control point
         public Color m_drawColor = Color.red;
         public Vector3 previousPosition = Vector3.zero;
         public Vector3 frameVelocity = Vector3.zero;
@@ -50,6 +50,7 @@ namespace SoundActor
             if (m_active && m_showValue) return true;
             return false;
         }
+        
 
         public bool m_active = true;
 

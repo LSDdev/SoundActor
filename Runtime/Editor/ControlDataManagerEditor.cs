@@ -42,7 +42,7 @@ public class ControlDataSenderEditor : Editor
 
     void DrawConnectionSetups()
     {
-        m_target.m_connectionFoldout = EditorGUILayout.Foldout(m_target.m_connectionFoldout, "Connection settings");
+        m_target.m_connectionFoldout = EditorGUILayout.Foldout(m_target.m_connectionFoldout, "Connection and output settings");
         using (new EditorGUI.IndentLevelScope())
             if (m_target.m_connectionFoldout)
             {
@@ -50,6 +50,7 @@ public class ControlDataSenderEditor : Editor
                 m_target.fmodEvent = (string)EditorGUILayout.TextField("FMOD event path:", m_target.fmodEvent);
                 m_target.oscAddress =(string)EditorGUILayout.TextField("OSC ip address:", m_target.oscAddress);
                 m_target.oscPort = (int)EditorGUILayout.IntField("OSC port:", m_target.oscPort);
+                m_target.m_outputChoice = (OutputChoice)EditorGUILayout.EnumPopup("Value if same targets: ", m_target.m_outputChoice);
                 EditorGUILayout.EndVertical();
             }
     }
@@ -62,7 +63,9 @@ public class ControlDataSenderEditor : Editor
             //Create an Undo/Redo step for this modification
             Undo.RecordObject(m_target, "Add new State");
 
-            m_target.controlPoints.Add(new AudioControlPoint());
+            //move this into main class?
+            //m_target.controlPoints.Add(new AudioControlPoint());
+            m_target.AddNewControlPoint();
 
             //Whenever you modify a component variable directly without using serializedObject you need to tell
             //Unity that this component has changed so the values are saved next time the user saves the project.

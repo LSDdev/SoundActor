@@ -10,6 +10,12 @@ public enum ControlDataType
     OSC
 }
 
+public enum OutputChoice
+{
+    MaxValue,
+    Avaraged
+}
+
 public enum ArgumentType
 {
     Position,
