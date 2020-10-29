@@ -18,7 +18,7 @@ namespace SoundActor
         [HideInInspector]
         public string oscAddress;
         [HideInInspector]
-        public int oscPort;
+        public int oscPort = 9200;
         [HideInInspector]
         public OutputChoice m_outputChoice;
         [HideInInspector]
@@ -58,7 +58,7 @@ namespace SoundActor
             }
         }
 
-        void UpdateValue(AudioControlPoint acp)
+        void UpdateValueHumanoid(AudioControlPoint acp)
         {
             Vector3 currentPos = animator.GetBoneTransform(acp.m_bonePoint).position;
             float value = 0;
@@ -97,13 +97,13 @@ namespace SoundActor
                 acp.fmodParameterValue = value;
             } else if (acp.m_argumentType == ArgumentType.Distance)
             {
-                if (acp.m_distanceTo == DistanceTo.JointToJoint)
+                if (acp.m_distanceTo == DistanceTo.ThisToJoint)
                 {
                     value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, animator.GetBoneTransform(acp.m_bonePointTo).position);
                     acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
                     //acp.fmodParameterValue = Mathf.Abs(value);
                     acp.fmodParameterValue = value;
-                } else if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.JointToObject)
+                } else if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.ThisToObject)
                 {
                     value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, acp.m_distanceToGameObject.transform.position);
                     acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
@@ -114,11 +114,74 @@ namespace SoundActor
             }
         }
 
- 
+        private void UpdateValueGameObject(AudioControlPoint acp)
+        {
+         Vector3 currentPos = transform.position;
+            float value = 0;
+            if (acp.m_argumentType == ArgumentType.Position)
+            {
+                switch (acp.m_axis)
+                {
+                    case Axis.x:
+                        value = transform.position.x;
+                        acp.positionOnSelectedAxis = value; //store the result into instance for reuse in other parts of GUI drawing
+                        //acp.fmodParameterValue = Mathf.Abs(value);
+                        acp.fmodParameterValue = value;
+                        break;
+                    case Axis.y:
+                        value = transform.position.y;
+                        acp.positionOnSelectedAxis = value;
+                        //acp.fmodParameterValue = Mathf.Abs(value);
+                        acp.fmodParameterValue = value;
+                        break;
+                    case Axis.z:
+                        value = transform.position.z;
+                        acp.positionOnSelectedAxis = value;
+                        //acp.fmodParameterValue = Mathf.Abs(value);
+                        acp.fmodParameterValue = value;
+                        break;
+                    default:
+                        break;
+                }
+            } else if (acp.m_argumentType == ArgumentType.Velocity)
+            {
+                Vector3 currFrameVelocity = (currentPos - acp.previousPosition) / Time.deltaTime;
+                acp.frameVelocity = Vector3.Lerp(acp.frameVelocity, currFrameVelocity, 0.1f);
+                acp.previousPosition = currentPos;
+                value = acp.velocityMagnitude();
+                //acp.fmodParameterValue = Mathf.Abs(value);
+                acp.fmodParameterValue = value;
+            } else if (acp.m_argumentType == ArgumentType.Distance)
+            {
+                if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.ThisToObject)
+                {
+                    value = Vector3.Distance(transform.position, acp.m_distanceToGameObject.transform.position);
+                    acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
+                    //acp.fmodParameterValue = Mathf.Abs(value);
+                    acp.fmodParameterValue = value;
+                }
+                
+            }   
+        }
 
         public void AddNewControlPoint()
         {
             AudioControlPoint acp = new AudioControlPoint();
+            //detect is there humanoid rig connected to this game object
+            if (animator && animator.GetBoneTransform(acp.m_bonePoint))
+            {
+                acp.m_controlPointType = ControlPointType.Humanoid;
+            }
+            else
+            {
+                acp.m_controlPointType = ControlPointType.GameObject;
+            }
+            // some defaults based on control point type
+            if (acp.m_controlPointType == ControlPointType.GameObject)
+            {
+                acp.m_distanceTo = DistanceTo.ThisToObject;
+            }
+            
             controlPoints.Add(acp);
         }
 
@@ -143,7 +206,16 @@ namespace SoundActor
                 float maxValue = 0f;
                 foreach (var point in entry.Value)
                 {
-                    UpdateValue(point);
+                    //update value based on object type acp is linked to
+                    if (point.m_controlPointType == ControlPointType.Humanoid)
+                    {
+                        UpdateValueHumanoid(point);    
+                    }
+                    else
+                    {
+                        UpdateValueGameObject(point);
+                    }
+                    
                     cumulativeValue += point.fmodParameterValue;
                     maxValue = point.fmodParameterValue > maxValue ? point.fmodParameterValue : maxValue;
                 }
@@ -165,7 +237,7 @@ namespace SoundActor
             }
             pointDict.Clear();
         }
-
+        
         private void IterateControlPoints()
         {
             foreach (AudioControlPoint acp in controlPoints) 
@@ -225,7 +297,8 @@ namespace SoundActor
         {
             foreach (AudioControlPoint acp in controlPoints)
             {
-                if (acp.m_visualizeBonePoint && acp.m_argumentType != ArgumentType.Distance && acp.m_active)
+                //Draw highlight only to humanoid joints 
+                if (acp.m_visualizeBonePoint && acp.m_argumentType != ArgumentType.Distance && acp.m_controlPointType != ControlPointType.GameObject && acp.m_active)
                 {
                     Gizmos.color = acp.m_drawColor;
                     Vector3 pos = animator.GetBoneTransform(acp.m_bonePoint).position;
@@ -236,22 +309,29 @@ namespace SoundActor
                 {
                     Vector3 p1, p2 = Vector3.zero;
                     Gizmos.color = acp.m_drawColor;
-                    
-                    p1 = animator.GetBoneTransform(acp.m_bonePointFrom).position;
+
+                    if (acp.m_controlPointType == ControlPointType.Humanoid)
+                    {
+                        p1 = animator.GetBoneTransform(acp.m_bonePointFrom).position;
+                    }
+                    else
+                    {
+                        p1 = transform.position;
+                    }
                     Gizmos.DrawSphere(p1, .03f);
                     
-                    if (acp.m_distanceTo == DistanceTo.JointToJoint)
+                    if (acp.m_distanceTo == DistanceTo.ThisToJoint)
                     {
                         p2 = animator.GetBoneTransform(acp.m_bonePointTo).position;
                         Gizmos.DrawSphere(p2, .03f);
                     } 
-                    else if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.JointToObject)
+                    else if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.ThisToObject)
                     {
                         p2 = acp.m_distanceToGameObject.transform.position;
                         Gizmos.DrawSphere(p2, .03f);
                     }
 
-                    if (acp.m_distanceTo == DistanceTo.JointToJoint || acp.m_distanceTo == DistanceTo.JointToObject && acp.m_distanceToGameObject != null)  // make sure relevant data is available and draw
+                    if (acp.m_distanceTo == DistanceTo.ThisToJoint || acp.m_distanceTo == DistanceTo.ThisToObject && acp.m_distanceToGameObject != null)  // make sure relevant data is available and draw
                     {
                         Handles.DrawBezier(p1, p2, p1, p2, acp.m_drawColor, null, 8f);    
                     }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using FMOD.Studio;
 using SoundActor;
 using UnityEngine;
@@ -36,7 +37,13 @@ public class AudioPointControllerEditor : Editor
         header.richText = true;
         header.alignment = TextAnchor.LowerCenter;
         EditorGUILayout.BeginHorizontal();
-        GUILayout.Label($"<size=20><color=#00FF00><b>{m_target.fmodEvent.Split('/')[1]}</b></color></size>", header);
+        if (!String.IsNullOrEmpty(m_target.fmodEvent))
+        {
+            GUILayout.Label($"<size=20><color=#00FF00><b>{m_target.fmodEvent.Split('/')[1]}</b></color></size>", header);   
+        } else if(String.IsNullOrEmpty(m_target.oscAddress))
+        {
+            GUILayout.Label($"<size=12><color=#dddddd><b>please set FMOD event or OSC address</b></color></size>", header);
+        }
         EditorGUILayout.EndHorizontal();
     }
 
@@ -80,38 +87,33 @@ public class AudioPointControllerEditor : Editor
         {
             return;
         }
-
+        AudioControlPoint acpoint = m_target.controlPoints[index];
+        
         //GUI properties
         GUIStyle cpStyle= new GUIStyle("box");
-        cpStyle.normal.background = MakeTex(600, 1, new Color(1.0f, 1.0f, 1.0f, 0.2f));
-
+        cpStyle.normal.background = MakeTex(600, 1, new Color(1.0f, 1.0f, 1.0f, 0.3f));
         EditorGUILayout.BeginVertical(cpStyle);
         EditorGUILayout.Space(5);
-
         EditorGUILayout.BeginHorizontal();
         GUI.backgroundColor = Color.white;
-        GUILayout.Label("Type", EditorStyles.label, GUILayout.Width(50));
-
-        //BeginChangeCheck() is a useful way to see if an inspector variable was changed between
-        //BeginChangeCheck() and EndChangeCheck()
-        //EditorGUI.BeginChangeCheck();
-        AudioControlPoint acpoint = m_target.controlPoints[index];
-        acpoint.m_controlType  = (ControlDataType)EditorGUILayout.EnumPopup(acpoint.m_controlType);
-        GUILayout.FlexibleSpace();
-        acpoint.m_active = (bool)EditorGUILayout.Toggle("In use", acpoint.m_active);
+        GUILayout.Label("Control", EditorStyles.label, GUILayout.Width(90));
+        acpoint.m_controlType  = (ControlDataType)EditorGUILayout.EnumPopup(acpoint.m_controlType, GUILayout.Width(120)); 
+        // EditorGUI.BeginChangeCheck();
+        // if(EditorGUI.EndChangeCheck())
+        // {
+        // }
+        acpoint.m_active = (bool)EditorGUILayout.Toggle(acpoint.m_active, GUILayout.Width(90));
         GUI.backgroundColor = Color.red;
-        if (GUILayout.Button("Remove")) {
+        if (GUILayout.Button("Remove", GUILayout.Width(90))) {
             Undo.RecordObject(m_target, "Delete Control Point");
             m_target.controlPoints.RemoveAt(index);
             EditorUtility.SetDirty(m_target);
         }
         GUI.backgroundColor = Color.white;
         EditorGUILayout.EndHorizontal();
-                
-        //EditorGUILayout.Space(8);
-
+        
         using (new EditorGUI.IndentLevelScope())
-            acpoint.m_foldout = EditorGUILayout.Foldout(acpoint.m_foldout, "Detailed settings");
+            acpoint.m_foldout = EditorGUILayout.Foldout(acpoint.m_foldout, "Detailed settings (" + acpoint.m_controlPointType.ToString() + ")" );
 
         if (acpoint.m_foldout) {
             EditorGUILayout.BeginVertical("box");
@@ -154,29 +156,34 @@ public class AudioPointControllerEditor : Editor
     void DrawControlPointData(AudioControlPoint acpoint)
     {
         acpoint.m_argumentType = (ArgumentType)EditorGUILayout.EnumPopup("Value from:", acpoint.m_argumentType);
+        // Position
         if(acpoint.m_argumentType == ArgumentType.Position)
         {
             EditorGUILayout.BeginHorizontal();
             acpoint.m_axis = (Axis)EditorGUILayout.EnumPopup("Selected axis:", acpoint.m_axis);
             EditorGUILayout.EndHorizontal();
-            acpoint.m_bonePoint = (HumanBodyBones)EditorGUILayout.EnumPopup("Control track point", acpoint.m_bonePoint);
+            if (acpoint.m_controlPointType == ControlPointType.Humanoid)
+            {
+                acpoint.m_bonePoint = (HumanBodyBones)EditorGUILayout.EnumPopup("Control track point", acpoint.m_bonePoint);   
+            }
         }
-        else if (acpoint.m_argumentType == ArgumentType.Velocity)
+        // Velocity
+        else if (acpoint.m_argumentType == ArgumentType.Velocity && acpoint.m_controlPointType == ControlPointType.Humanoid)
         {
             acpoint.m_bonePoint = (HumanBodyBones)EditorGUILayout.EnumPopup("Control track point", acpoint.m_bonePoint);
         }
-                    
-        if (acpoint.m_argumentType == ArgumentType.Distance)
+        // Distance
+        if (acpoint.m_argumentType == ArgumentType.Distance && acpoint.m_controlPointType == ControlPointType.Humanoid)
         {
             acpoint.m_distanceTo = (DistanceTo) EditorGUILayout.EnumPopup("Distance between:", acpoint.m_distanceTo);
-            if (acpoint.m_distanceTo == DistanceTo.JointToJoint)
+            if (acpoint.m_distanceTo == DistanceTo.ThisToJoint)
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Distance between:", GUILayout.MaxWidth(125));
                 acpoint.m_bonePointFrom = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointFrom, GUILayout.ExpandWidth(true));
                 acpoint.m_bonePointTo = (HumanBodyBones)EditorGUILayout.EnumPopup(acpoint.m_bonePointTo, GUILayout.ExpandWidth(true));
                 EditorGUILayout.EndHorizontal();
-            } else if (acpoint.m_distanceTo == DistanceTo.JointToObject)
+            } else if (acpoint.m_distanceTo == DistanceTo.ThisToObject)
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("From joint to object:", GUILayout.MaxWidth(125));
@@ -184,6 +191,13 @@ public class AudioPointControllerEditor : Editor
                 acpoint.m_distanceToGameObject = (GameObject)EditorGUILayout.ObjectField(acpoint.m_distanceToGameObject, typeof(GameObject), true);
                 EditorGUILayout.EndHorizontal();
             }
+        }
+        else if (acpoint.m_argumentType == ArgumentType.Distance && acpoint.m_controlPointType == ControlPointType.GameObject)
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Distance to object:");
+            acpoint.m_distanceToGameObject = (GameObject)EditorGUILayout.ObjectField(acpoint.m_distanceToGameObject, typeof(GameObject), true);
+            EditorGUILayout.EndHorizontal();
         }
     }
 

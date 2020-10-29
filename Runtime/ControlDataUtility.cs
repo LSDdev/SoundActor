@@ -1,13 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
+﻿using System;
 
 
 public enum ControlDataType
 {
     FMODEvent,
     OSC
+}
+
+public enum ControlPointType
+{
+    Humanoid,
+    GameObject
 }
 
 public enum OutputChoice
@@ -25,8 +28,8 @@ public enum ArgumentType
 
 public enum DistanceTo
 {
-    JointToJoint,
-    JointToObject
+    ThisToJoint,
+    ThisToObject
 }
 
 public enum Axis

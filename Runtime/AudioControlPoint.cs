@@ -8,14 +8,16 @@ namespace SoundActor
     public class AudioControlPoint
     {
         public ControlDataType m_controlType = ControlDataType.FMODEvent;
+        public ControlPointType m_controlPointType = ControlPointType.Humanoid;
         public string m_oscCommand = "/";
         public string m_fmodParameter = "";
         public ArgumentType m_argumentType = ArgumentType.Position;
         public Axis m_axis = Axis.x;
-        public DistanceTo m_distanceTo = DistanceTo.JointToJoint;
+        public DistanceTo m_distanceTo = DistanceTo.ThisToJoint;
         public HumanBodyBones m_bonePoint = HumanBodyBones.Neck;
         public HumanBodyBones m_bonePointFrom = HumanBodyBones.LeftHand;
         public HumanBodyBones m_bonePointTo = HumanBodyBones.RightHand;
+        
         public GameObject m_distanceToGameObject;
         //public ControlDataManager cds; //reference to the object holding the control point
         public Color m_drawColor = Color.red;
@@ -51,7 +53,6 @@ namespace SoundActor
             return false;
         }
         
-
         public bool m_active = true;
 
         //FIXME: these are for the unity inspector editor system, should be refactored out of here
