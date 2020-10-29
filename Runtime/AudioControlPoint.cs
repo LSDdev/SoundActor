@@ -26,16 +26,16 @@ namespace SoundActor
         public float positionOnSelectedAxis = 0f;
         public float distanceBetweenPoints = 0f;
 
-        private float _fmodParameterValue;
-        public float fmodParameterValue {
-            get { return _fmodParameterValue; }
-            set { _fmodParameterValue = value;
-                if(_fmodParameterValue < minVal)
+        private float _controlPointDataValue;
+        public float ControlPointDataValue {
+            get { return _controlPointDataValue; }
+            set { _controlPointDataValue = value;
+                if(_controlPointDataValue < minVal)
                 {
-                    minVal = _fmodParameterValue;
-                } else if (_fmodParameterValue > maxVal)
+                    minVal = _controlPointDataValue;
+                } else if (_controlPointDataValue > maxVal)
                 {
-                    maxVal = _fmodParameterValue;
+                    maxVal = _controlPointDataValue;
                 }
             }
         }  //store the current value of parameter to fmod into this, can be reused in different parts of the UI

@@ -70,19 +70,19 @@ namespace SoundActor
                         value = animator.GetBoneTransform(acp.m_bonePoint).position.x;
                         acp.positionOnSelectedAxis = value; //store the result into instance for reuse in other parts of GUI drawing
                         //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
+                        acp.ControlPointDataValue = value;
                         break;
                     case Axis.y:
                         value = animator.GetBoneTransform(acp.m_bonePoint).position.y;
                         acp.positionOnSelectedAxis = value;
                         //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
+                        acp.ControlPointDataValue = value;
                         break;
                     case Axis.z:
                         value = animator.GetBoneTransform(acp.m_bonePoint).position.z;
                         acp.positionOnSelectedAxis = value;
                         //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
+                        acp.ControlPointDataValue = value;
                         break;
                     default:
                         break;
@@ -94,7 +94,7 @@ namespace SoundActor
                 acp.previousPosition = currentPos;
                 value = acp.velocityMagnitude();
                 //acp.fmodParameterValue = Mathf.Abs(value);
-                acp.fmodParameterValue = value;
+                acp.ControlPointDataValue = value;
             } else if (acp.m_argumentType == ArgumentType.Distance)
             {
                 if (acp.m_distanceTo == DistanceTo.ThisToJoint)
@@ -102,13 +102,13 @@ namespace SoundActor
                     value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, animator.GetBoneTransform(acp.m_bonePointTo).position);
                     acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
                     //acp.fmodParameterValue = Mathf.Abs(value);
-                    acp.fmodParameterValue = value;
+                    acp.ControlPointDataValue = value;
                 } else if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.ThisToObject)
                 {
                     value = Vector3.Distance(animator.GetBoneTransform(acp.m_bonePointFrom).position, acp.m_distanceToGameObject.transform.position);
                     acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
                     //acp.fmodParameterValue = Mathf.Abs(value);
-                    acp.fmodParameterValue = value;
+                    acp.ControlPointDataValue = value;
                 }
                 
             }
@@ -126,19 +126,19 @@ namespace SoundActor
                         value = transform.position.x;
                         acp.positionOnSelectedAxis = value; //store the result into instance for reuse in other parts of GUI drawing
                         //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
+                        acp.ControlPointDataValue = value;
                         break;
                     case Axis.y:
                         value = transform.position.y;
                         acp.positionOnSelectedAxis = value;
                         //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
+                        acp.ControlPointDataValue = value;
                         break;
                     case Axis.z:
                         value = transform.position.z;
                         acp.positionOnSelectedAxis = value;
                         //acp.fmodParameterValue = Mathf.Abs(value);
-                        acp.fmodParameterValue = value;
+                        acp.ControlPointDataValue = value;
                         break;
                     default:
                         break;
@@ -150,7 +150,7 @@ namespace SoundActor
                 acp.previousPosition = currentPos;
                 value = acp.velocityMagnitude();
                 //acp.fmodParameterValue = Mathf.Abs(value);
-                acp.fmodParameterValue = value;
+                acp.ControlPointDataValue = value;
             } else if (acp.m_argumentType == ArgumentType.Distance)
             {
                 if (acp.m_distanceToGameObject != null && acp.m_distanceTo == DistanceTo.ThisToObject)
@@ -158,7 +158,7 @@ namespace SoundActor
                     value = Vector3.Distance(transform.position, acp.m_distanceToGameObject.transform.position);
                     acp.distanceBetweenPoints = value; //store the result into instance for reuse in other parts of GUI drawing
                     //acp.fmodParameterValue = Mathf.Abs(value);
-                    acp.fmodParameterValue = value;
+                    acp.ControlPointDataValue = value;
                 }
                 
             }   
@@ -216,8 +216,8 @@ namespace SoundActor
                         UpdateValueGameObject(point);
                     }
                     
-                    cumulativeValue += point.fmodParameterValue;
-                    maxValue = point.fmodParameterValue > maxValue ? point.fmodParameterValue : maxValue;
+                    cumulativeValue += point.ControlPointDataValue;
+                    maxValue = point.ControlPointDataValue > maxValue ? point.ControlPointDataValue : maxValue;
                 }
                 
                 //determine the final value for output
@@ -279,20 +279,6 @@ namespace SoundActor
             }
         }
         
-        private Texture2D MakeTex(int width, int height, Color col)
-        {
-            Color[] pix = new Color[width * height];
-
-            for (int i = 0; i < pix.Length; i++)
-                pix[i] = col;
-
-            Texture2D result = new Texture2D(width, height);
-            result.SetPixels(pix);
-            result.Apply();
-
-            return result;
-        }
-
         private void OnDrawGizmos()
         {
             foreach (AudioControlPoint acp in controlPoints)
@@ -302,8 +288,8 @@ namespace SoundActor
                 {
                     Gizmos.color = acp.m_drawColor;
                     Vector3 pos = animator.GetBoneTransform(acp.m_bonePoint).position;
-                    Gizmos.DrawSphere(pos, .03f);
-                    Handles.Label(pos + Vector3.up * 0.2f, "Value");
+                    Gizmos.DrawSphere(pos, .05f);
+                    Handles.Label(pos + Vector3.up * 0.4f, acp.ControlPointDataValue.ToString("F2"));
                 }
                 if (acp.m_visualizeBonePoint && acp.m_argumentType == ArgumentType.Distance && acp.m_active)
                 {

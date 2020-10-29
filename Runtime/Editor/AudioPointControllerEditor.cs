@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FMOD.Studio;
 using SoundActor;
@@ -9,9 +10,13 @@ using UnityEditor;
 public class AudioPointControllerEditor : Editor
 {
     AudioControlPointController m_target;
+    private Dictionary<Color, Texture2D> _labelTextureStorage;
+    private Dictionary<String, Texture2D> _inspectorTextureStorage;
 
     public override void OnInspectorGUI()
     {
+        if (_labelTextureStorage == null) {_labelTextureStorage = new Dictionary<Color, Texture2D>();}
+        if (_inspectorTextureStorage == null) {_inspectorTextureStorage = new Dictionary<String, Texture2D>();}
         m_target = (AudioControlPointController)target;
         //base.OnInspectorGUI();
         
@@ -91,7 +96,13 @@ public class AudioPointControllerEditor : Editor
         
         //GUI properties
         GUIStyle cpStyle= new GUIStyle("box");
-        cpStyle.normal.background = MakeTex(600, 1, new Color(1.0f, 1.0f, 1.0f, 0.3f));
+        
+        //this is bit hacky bit otherwise texture garbage keeps piling up until playmode is exited
+        if (!_inspectorTextureStorage.ContainsKey("drawControlPoint"))
+        {
+            _inspectorTextureStorage["drawControlPoint"] = MakeTex(600, 1, new Color(1.0f, 1.0f, 1.0f, 0.3f));
+        }
+        cpStyle.normal.background = _inspectorTextureStorage["drawControlPoint"];
         EditorGUILayout.BeginVertical(cpStyle);
         EditorGUILayout.Space(5);
         EditorGUILayout.BeginHorizontal();
@@ -203,16 +214,12 @@ public class AudioPointControllerEditor : Editor
 
     private Texture2D MakeTex(int width, int height, Color col)
     {
-        Color[] pix = new Color[width * height];
-
-        for (int i = 0; i < pix.Length; i++)
-            pix[i] = col;
-
-        Texture2D result = new Texture2D(width, height);
-        result.SetPixels(pix);
-        result.Apply();
-
-        return result;
+        var texture = new Texture2D(width, height);
+        texture.hideFlags = HideFlags.HideAndDontSave;
+        Color[] pixels = Enumerable.Repeat(col, width * height).ToArray();
+        texture.SetPixels(pixels);
+        texture.Apply();
+        return texture;
     }
 
 
@@ -227,12 +234,16 @@ public class AudioPointControllerEditor : Editor
 
                 if (acpoint.valuesShouldBeVisible())
                 {
+                    if (!_labelTextureStorage.ContainsKey(acpoint.m_drawColor))
+                    {
+                        _labelTextureStorage[acpoint.m_drawColor] = MakeTex(15, 15, acpoint.m_drawColor);
+                    }
                     //draw the value
                     Handles.BeginGUI();
                     GUI.backgroundColor = acpoint.m_drawColor;
                     GUILayout.BeginHorizontal();
-                    GUILayout.Box(MakeTex(15, 15, acpoint.m_drawColor));
-                    GUILayout.Box("Value for " + acpoint.m_argumentType.ToString() + ": " + acpoint.fmodParameterValue.ToString("F2"), GUILayout.Width(160));
+                    GUILayout.Box(_labelTextureStorage[acpoint.m_drawColor]);
+                    GUILayout.Box("Value for " + acpoint.m_argumentType.ToString() + ": " + acpoint.ControlPointDataValue.ToString("F2"), GUILayout.Width(160));
                     GUILayout.Box("min: " + acpoint.minVal.ToString("F2"), GUILayout.Width(80));
                     GUILayout.Box("max " + acpoint.maxVal.ToString("F2"), GUILayout.Width(80));
                     GUILayout.EndHorizontal();
@@ -241,6 +252,12 @@ public class AudioPointControllerEditor : Editor
             }
 
         }
+    }
+
+    private void OnDisable()
+    {
+        _inspectorTextureStorage.Clear();
+        _labelTextureStorage.Clear();
     }
 }
 
