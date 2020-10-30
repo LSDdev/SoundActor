@@ -9,7 +9,9 @@ When used with humanoid rigged character you can use any bone in the rig to cont
 
 When used on regular game object all the same applies with the obvious difference that humanoid bones are not available.
 
-![Example](https://media.giphy.com/media/kXqf9xoJ1lnfzR6gd9/giphy.gif)
+
+<img src="https://user-images.githubusercontent.com/16014157/97693161-69b1fe80-1aa9-11eb-8bfc-06569075480c.jpg" width="600">
+		<img src="https://media.giphy.com/media/kXqf9xoJ1lnfzR6gd9/giphy.gif" width="600">
 
 # Installing Sound Actor
 
