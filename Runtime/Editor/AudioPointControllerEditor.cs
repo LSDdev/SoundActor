@@ -104,16 +104,26 @@ public class AudioPointControllerEditor : Editor
         }
         cpStyle.normal.background = _inspectorTextureStorage["drawControlPoint"];
         EditorGUILayout.BeginVertical(cpStyle);
+        
         EditorGUILayout.Space(5);
+        
         EditorGUILayout.BeginHorizontal();
         GUI.backgroundColor = Color.white;
-        GUILayout.Label("Control", EditorStyles.label, GUILayout.Width(90));
-        acpoint.m_controlType  = (ControlDataType)EditorGUILayout.EnumPopup(acpoint.m_controlType, GUILayout.Width(120)); 
+        GUILayout.Label("Control", EditorStyles.label);
+        acpoint.m_controlType  = (ControlDataType)EditorGUILayout.EnumPopup(acpoint.m_controlType); 
         // EditorGUI.BeginChangeCheck();
         // if(EditorGUI.EndChangeCheck())
         // {
         // }
-        acpoint.m_active = (bool)EditorGUILayout.Toggle(acpoint.m_active, GUILayout.Width(90));
+        
+        EditorGUILayout.Space(15);
+        GUIStyle header = new GUIStyle();
+        header.richText = true;
+        header.alignment = TextAnchor.LowerCenter;
+        GUILayout.Label($"<size=15><color=#eeeeee><b>{acpoint.m_fmodParameter}</b></color></size>", header);
+        EditorGUILayout.Space(25);
+        
+        acpoint.m_active = (bool)EditorGUILayout.Toggle(acpoint.m_active);
         GUI.backgroundColor = Color.red;
         if (GUILayout.Button("Remove", GUILayout.Width(90))) {
             Undo.RecordObject(m_target, "Delete Control Point");

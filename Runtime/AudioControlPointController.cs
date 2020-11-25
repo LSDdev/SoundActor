@@ -1,8 +1,9 @@
-﻿using System;
+﻿ using System;
 using System.Collections;
 using System.Collections.Generic;
 using FMOD;
-using UnityEngine;
+ using FMOD.Studio;
+ using UnityEngine;
 using UnityEditor;
 using OscJack;
 using Debug = UnityEngine.Debug;
@@ -48,8 +49,8 @@ namespace SoundActor
         {
             if (!String.IsNullOrEmpty(fmodEvent))
             {
-                _instance = FMODUnity.RuntimeManager.CreateInstance(fmodEvent);
-                _instance.start();   
+                //need to have shared instance pointing to fmod event between possible multiple audiopointcontroller
+                _instance = FMODEventInstancer.instance.GetFmodEventInstance(fmodEvent);
             }
 
             if (!String.IsNullOrEmpty(oscAddress) && oscPort > 1000)  //FIXME: port checking is just wrong
@@ -323,6 +324,11 @@ namespace SoundActor
                     }
                 }
             }
+        }
+
+        private void OnDestroy()
+        {
+            FMODEventInstancer.instance.ReleaseFmodInstance(fmodEvent);  // This is not okay, need to build some sort of retaining relation from instances hooking into fmod and only release the instance when there is no one left
         }
     }
 }
