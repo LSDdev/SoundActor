@@ -13,7 +13,12 @@ When used on regular game object all the same applies with the obvious differenc
 <img src="https://user-images.githubusercontent.com/16014157/97693161-69b1fe80-1aa9-11eb-8bfc-06569075480c.jpg" width="700">
 <img src="https://user-images.githubusercontent.com/16014157/97710670-b9ea8a00-1ac4-11eb-998a-784fe8344fae.gif" width="700">
 
+---
+
+
 # Installing Sound Actor
+
+## Step 1
 
 Add this into your project's package manifest 
 
@@ -21,28 +26,40 @@ Add this into your project's package manifest
 "fi.uniarts.soundactor": "https://github.com/LSDdev/SoundActor.git"
 ````
 
+## Step 2
 You also need to setup the FMOD Unity integration, which you can get from www.fmod.com (requires free account) or from [Asset Store](https://assetstore.unity.com/packages/tools/audio/fmod-for-unity-161631).
 
 Once you have imported the integration into your project you need to create Unity's assembly definitions for FMOD in order to use this package. Go to your assets and locate the FMOD plugin and locate the Runtime folder under src. Create asmdef with a name of **FMODUnity** under Runtime and add Timeline as dependancy. That's all.
 
 ![Example](https://media.giphy.com/media/43bsre4ylQirSsXUmf/giphy.gif)
 
+## Step 3
+
+You need also to install the OscJack package from Keijiro, follow the instructions here [https://github.com/keijiro/OscJack](https://github.com/keijiro/OscJack) 
+
+---
+
 # Using SoundActor
 
-Docs for the usage should be coming.
+Detailed docs and example video for the usage should be coming. In the meanwhile the basic gist is following;
 
+1. Add _Audio Control Point Controller_ component to game object. Component tries to look if that game object has humanoid rig (simple lookup via animator) or is it regular game object. 
+2. Setup the fmod event name in _Connection and output settings_
+3. Start adding control points and use the parameter names you have in fmod (_fmod control parameter_).
+4. Hit play and you should be able to control parameters in fmod side.
 
-# Technical details
-## Requirements
+---
+
+# Requirements
 
 Currently SoundActor requires the following
 
 * 2019.3 or later
 * [FMODUnity integration package](https://assetstore.unity.com/packages/tools/audio/fmod-for-unity-161631)
 * [FMOD Studio](https://www.fmod.com)
+* [OscJack](https://github.com/keijiro/OscJack) 
 
 If you intend send out data as OSC messages you also need
-* [OscJack](https://github.com/keijiro/OscJack) 
 * Some OSC capable sound source 
 
 
