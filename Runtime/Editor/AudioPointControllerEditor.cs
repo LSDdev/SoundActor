@@ -23,6 +23,7 @@ public class AudioPointControllerEditor : Editor
         EditorGUILayout.Space(8);
         DrawControlPointHeader();
         DrawConnectionSetups();
+        DrawStartSetup();
         //EditorGUILayout.Space(8);
         m_target.m_controlPointsFoldout = EditorGUILayout.Foldout(m_target.m_controlPointsFoldout, "Control points");
         if (m_target.m_controlPointsFoldout)
@@ -60,11 +61,27 @@ public class AudioPointControllerEditor : Editor
             {
                 EditorGUILayout.BeginVertical();
                 m_target.fmodEvent = (string)EditorGUILayout.TextField("FMOD event path:", m_target.fmodEvent);
-                m_target.oscAddress =(string)EditorGUILayout.TextField("OSC ip address:", m_target.oscAddress);
+                m_target.oscAddress = (string)EditorGUILayout.TextField("OSC ip address:", m_target.oscAddress);
                 m_target.oscPort = (int)EditorGUILayout.IntField("OSC port:", m_target.oscPort);
                 m_target.m_outputChoice = (OutputChoice)EditorGUILayout.EnumPopup("Value if same targets: ", m_target.m_outputChoice);
                 EditorGUILayout.EndVertical();
                 m_target.fps = (int)EditorGUILayout.IntField("fps for data: ", m_target.fps);
+            }
+    }
+
+    void DrawStartSetup() 
+    {
+        m_target.m_startModeFoldout = EditorGUILayout.Foldout(m_target.m_startModeFoldout, "Event start settings");
+        using (new EditorGUI.IndentLevelScope())
+            if (m_target.m_startModeFoldout)
+            {
+                EditorGUILayout.BeginVertical();
+                m_target.m_startMode = (StartMode)EditorGUILayout.EnumPopup("Start type: ", m_target.m_startMode);
+                if (m_target.m_startMode == StartMode.Triggered) 
+                {
+                    m_target.m_startSignalName = (string)EditorGUILayout.TextField("Start signal name:", m_target.m_startSignalName);
+                }
+                EditorGUILayout.EndVertical();
             }
     }
 

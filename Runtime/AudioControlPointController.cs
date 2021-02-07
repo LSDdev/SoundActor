@@ -25,16 +25,22 @@ namespace SoundActor
         [HideInInspector]
         public bool m_connectionFoldout = true;
         [HideInInspector]
+        public bool m_startModeFoldout = true;
+        [HideInInspector]
         public bool m_controlPointsFoldout = true;
         [HideInInspector]
         public List<AudioControlPoint> controlPoints = new List<AudioControlPoint>();
         [HideInInspector]
         public Animator animator;
 		[HideInInspector]
-        public int fps;
+        public int fps = 25;
+        [HideInInspector]
+        public StartMode m_startMode;
+        [HideInInspector]
+        public string m_startSignalName;
 
         private float _lastExecTime = 0f;
-        private float _timeThreshold = 0.02f; //50fps
+        private float _timeThreshold;
         private float _fmodExectime;
         private OscClient _client;
 
@@ -49,12 +55,17 @@ namespace SoundActor
             animator = GetComponent<Animator>();
         }
 
+        private void OnEnable() {
+            EventSignaling.StartListening(m_startSignalName, StartFMOD);
+        }
+
         private void Start()
         {
             if (!String.IsNullOrEmpty(fmodEvent))
             {
                 //need to have shared instance pointing to fmod event between possible multiple audiopointcontroller
                 _instance = FMODEventInstancer.instance.GetFmodEventInstance(fmodEvent);
+                if(m_startMode == StartMode.Automatic) { StartFMOD(); }
             }
 
             if (!String.IsNullOrEmpty(oscAddress) && oscPort > 1000)  //FIXME: port checking is just wrong
@@ -68,6 +79,14 @@ namespace SoundActor
             if (debugMode)
             {
                 Debug.Log("Currently " + controlPoints.Count.ToString() + " control points attached to " + gameObject.name );
+            }
+        }
+
+        private void StartFMOD() {
+            FMOD.Studio.PLAYBACK_STATE ps;
+            _instance.getPlaybackState(out ps);
+            if(ps != FMOD.Studio.PLAYBACK_STATE.PLAYING) {
+                _instance.start();
             }
         }
 
@@ -341,6 +360,7 @@ namespace SoundActor
 
         private void OnDisable()
         {
+            EventSignaling.StopListening(m_startSignalName, StartFMOD);
             FMODEventInstancer.instance.ReleaseFmodInstance(fmodEvent);  // This is not okay, need to build some sort of retaining relation from instances hooking into fmod and only release the instance when there is no one left
         }
     }

@@ -38,3 +38,8 @@ public enum Axis
     y,
     z
 }
+
+public enum StartMode {
+    Automatic,
+    Triggered
+}

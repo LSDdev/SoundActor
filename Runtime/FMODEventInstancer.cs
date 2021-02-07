@@ -7,8 +7,8 @@ using FMOD.Studio;
 
 public sealed class FMODEventInstancer
 {
+    //we store fmod event instances into dict to pass out reference to same instance between different control points
     private Dictionary<String, EventInstance> _instances;
-    
     
     private static FMODEventInstancer _instance = null;
     // mutex lock for thread safety
@@ -43,7 +43,7 @@ public sealed class FMODEventInstancer
         else
         {
             var eventInstance = FMODUnity.RuntimeManager.CreateInstance(eventName);
-            eventInstance.start();
+            //eventInstance.start();
             _instances.Add(eventName, eventInstance);
             return eventInstance;
         }
