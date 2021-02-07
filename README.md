@@ -29,9 +29,6 @@ Add this into your project's package manifest
 ## Step 2
 You also need to setup the FMOD Unity integration, which you can get from www.fmod.com (requires free account) or from [Asset Store](https://assetstore.unity.com/packages/tools/audio/fmod-for-unity-161631).
 
-Once you have imported the integration into your project you need to create Unity's assembly definitions for FMOD in order to use this package. Go to your assets and locate the FMOD plugin and locate the Runtime folder under src. Create asmdef with a name of **FMODUnity** under Runtime and add Timeline as dependancy. That's all.
-
-![Example](https://media.giphy.com/media/43bsre4ylQirSsXUmf/giphy.gif)
 
 ## Step 3
 

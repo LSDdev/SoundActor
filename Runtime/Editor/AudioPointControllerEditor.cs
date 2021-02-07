@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FMOD.Studio;
@@ -64,6 +64,7 @@ public class AudioPointControllerEditor : Editor
                 m_target.oscPort = (int)EditorGUILayout.IntField("OSC port:", m_target.oscPort);
                 m_target.m_outputChoice = (OutputChoice)EditorGUILayout.EnumPopup("Value if same targets: ", m_target.m_outputChoice);
                 EditorGUILayout.EndVertical();
+                m_target.fps = (int)EditorGUILayout.IntField("fps for data: ", m_target.fps);
             }
     }
 

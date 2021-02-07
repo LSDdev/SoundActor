@@ -1,16 +1,16 @@
-﻿ using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using FMOD;
- using FMOD.Studio;
- using UnityEngine;
+using FMOD.Studio;
+using UnityEngine;
 using UnityEditor;
 using OscJack;
 using Debug = UnityEngine.Debug;
 
 namespace SoundActor
 {
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     public class AudioControlPointController : MonoBehaviour
     {
         private FMOD.Studio.EventInstance _instance;
@@ -30,11 +30,15 @@ namespace SoundActor
         public List<AudioControlPoint> controlPoints = new List<AudioControlPoint>();
         [HideInInspector]
         public Animator animator;
+		[HideInInspector]
+        public int fps;
 
         private float _lastExecTime = 0f;
         private float _timeThreshold = 0.02f; //50fps
         private float _fmodExectime;
         private OscClient _client;
+
+        private bool debugMode = true;
 
         private Dictionary<string, List<AudioControlPoint>> _fmodPointsByAttribute = new Dictionary<string, List<AudioControlPoint>>();
         private Dictionary<string, List<AudioControlPoint>> _oscPointsByCommand = new Dictionary<string, List<AudioControlPoint>>();
@@ -56,6 +60,14 @@ namespace SoundActor
             if (!String.IsNullOrEmpty(oscAddress) && oscPort > 1000)  //FIXME: port checking is just wrong
             {
                 _client = new OscClient(oscAddress, oscPort);
+            }
+
+            //Need to zero _lastExecTime as it's value is otherwise carried over from edit mode execution
+            _lastExecTime = 0f;
+
+            if (debugMode)
+            {
+                Debug.Log("Currently " + controlPoints.Count.ToString() + " control points attached to " + gameObject.name );
             }
         }
 
@@ -162,7 +174,7 @@ namespace SoundActor
                     acp.ControlPointDataValue = value;
                 }
                 
-            }   
+            }
         }
 
         public void AddNewControlPoint()
@@ -188,6 +200,7 @@ namespace SoundActor
 
         private void Update()
         {
+            _timeThreshold = 1.0f / fps;
             if (Time.time - _lastExecTime > _timeThreshold)   //throttle the data output
             {
                 IterateControlPoints();
@@ -225,7 +238,7 @@ namespace SoundActor
                 float outValue = m_outputChoice == OutputChoice.MaxValue ? maxValue : cumulativeValue / size;
                 
                 //FMOD or OSC
-                if (Application.isPlaying)
+                if (Application.isPlaying)  //so we are not sending data while in edit
                 {
                     if (entry.Value[0].m_controlType == ControlDataType.FMODEvent)
                     {
@@ -243,7 +256,7 @@ namespace SoundActor
         {
             foreach (AudioControlPoint acp in controlPoints) 
             {
-                //this is bit inefficient but doesn't matter now in this context
+                //this is inefficient as we start from beginning on each update loop, but it doesn't matter now in this context
                 //create audio control point groupings based on point's current fmod attribute or OSC command
                 //use own list for each type, fmod or osc
                 if (acp.m_controlType == ControlDataType.FMODEvent)
@@ -326,7 +339,7 @@ namespace SoundActor
             }
         }
 
-        private void OnDestroy()
+        private void OnDisable()
         {
             FMODEventInstancer.instance.ReleaseFmodInstance(fmodEvent);  // This is not okay, need to build some sort of retaining relation from instances hooking into fmod and only release the instance when there is no one left
         }
