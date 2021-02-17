@@ -83,6 +83,18 @@ public class AudioPointControllerEditor : Editor
                 }
                 EditorGUILayout.EndVertical();
             }
+        m_target.m_stopModeFoldout = EditorGUILayout.Foldout(m_target.m_stopModeFoldout, "Event stop settings");
+        using (new EditorGUI.IndentLevelScope())
+            if (m_target.m_stopModeFoldout)
+            {
+                EditorGUILayout.BeginVertical();
+                m_target.m_stopMode = (StopMode)EditorGUILayout.EnumPopup("Stop type: ", m_target.m_stopMode);
+                if (m_target.m_stopMode == StopMode.Triggered) 
+                {
+                    m_target.m_stopSignalName = (string)EditorGUILayout.TextField("Stop signal name:", m_target.m_stopSignalName);
+                }
+                EditorGUILayout.EndVertical();
+            }
     }
 
     void DrawAddControlPointButton()
@@ -284,8 +296,23 @@ public class AudioPointControllerEditor : Editor
 
     private void OnDisable()
     {
-        _inspectorTextureStorage.Clear();
-        _labelTextureStorage.Clear();
+        try
+        {
+            _inspectorTextureStorage.Clear();
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e, this);
+        }
+        
+        try
+        {
+            _labelTextureStorage.Clear();
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e, this);
+        }
     }
 }
 

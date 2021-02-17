@@ -27,6 +27,8 @@ namespace SoundActor
         [HideInInspector]
         public bool m_startModeFoldout = true;
         [HideInInspector]
+        public bool m_stopModeFoldout = false;
+        [HideInInspector]
         public bool m_controlPointsFoldout = true;
         [HideInInspector]
         public List<AudioControlPoint> controlPoints = new List<AudioControlPoint>();
@@ -37,7 +39,11 @@ namespace SoundActor
         [HideInInspector]
         public StartMode m_startMode;
         [HideInInspector]
+        public StopMode m_stopMode;
+        [HideInInspector]
         public string m_startSignalName;
+        [HideInInspector]
+        public string m_stopSignalName;
 
         private float _lastExecTime = 0f;
         private float _timeThreshold;
@@ -56,7 +62,15 @@ namespace SoundActor
         }
 
         private void OnEnable() {
-            EventSignaling.StartListening(m_startSignalName, StartFMOD);
+            if (m_startMode == StartMode.Triggered && !String.IsNullOrEmpty(m_startSignalName))
+            {
+                EventSignaling.StartListening(m_startSignalName, StartFMOD);    
+            }
+            if (m_stopMode == StopMode.Triggered && !String.IsNullOrEmpty(m_stopSignalName))
+            {
+                EventSignaling.StartListening(m_stopSignalName, StopFMOD);    
+            }
+            
         }
 
         private void Start()
@@ -78,7 +92,7 @@ namespace SoundActor
 
             if (debugMode)
             {
-                Debug.Log("Currently " + controlPoints.Count.ToString() + " control points attached to " + gameObject.name );
+                Debug.Log("Currently " + controlPoints.Count.ToString() + " parameter control points attached to " + gameObject.name + " for fmod instrument " + fmodEvent.Split('/')[1]);
             }
         }
 
@@ -87,6 +101,14 @@ namespace SoundActor
             _instance.getPlaybackState(out ps);
             if(ps != FMOD.Studio.PLAYBACK_STATE.PLAYING) {
                 _instance.start();
+            }
+        }
+        
+        private void StopFMOD() {
+            FMOD.Studio.PLAYBACK_STATE ps;
+            _instance.getPlaybackState(out ps);
+            if(ps == FMOD.Studio.PLAYBACK_STATE.PLAYING) {
+                _instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
             }
         }
 

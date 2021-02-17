@@ -43,3 +43,8 @@ public enum StartMode {
     Automatic,
     Triggered
 }
+
+public enum StopMode {
+    Automatic,
+    Triggered
+}
