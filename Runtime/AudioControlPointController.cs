@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using FMOD;
 using FMOD.Studio;
 using UnityEngine;
@@ -90,7 +91,7 @@ namespace SoundActor
             //Need to zero _lastExecTime as it's value is otherwise carried over from edit mode execution
             _lastExecTime = 0f;
 
-            if (debugMode)
+            if (debugMode && (controlPoints!= null) && (controlPoints.Count > 0) )
             {
                 Debug.Log("Currently " + controlPoints.Count.ToString() + " parameter control points attached to " + gameObject.name + " for fmod instrument " + fmodEvent.Split('/')[1]);
             }
