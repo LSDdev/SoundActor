@@ -2,7 +2,7 @@
     "name": "SoundActor",
     "references": [
         "FMODUnity",
-        "jp.keijiro.osc-jack.Runtime"
+        "OscJack.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

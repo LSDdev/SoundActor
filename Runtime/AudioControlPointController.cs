@@ -83,7 +83,7 @@ namespace SoundActor
                 if(m_startMode == StartMode.Automatic) { StartFMOD(); }
             }
 
-            if (!String.IsNullOrEmpty(oscAddress) && oscPort > 1000)  //FIXME: port checking is just wrong
+            if (!String.IsNullOrEmpty(oscAddress) && oscPort > 1000)  //FIXME: port checking this way is just wrong
             {
                 _client = new OscClient(oscAddress, oscPort);
             }
