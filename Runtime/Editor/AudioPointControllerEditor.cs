@@ -24,6 +24,7 @@ public class AudioPointControllerEditor : Editor
         DrawControlPointHeader();
         DrawConnectionSetups();
         DrawStartSetup();
+        DrawMiscSetup();
         //EditorGUILayout.Space(8);
         m_target.m_controlPointsFoldout = EditorGUILayout.Foldout(m_target.m_controlPointsFoldout, "Control points");
         if (m_target.m_controlPointsFoldout)
@@ -96,6 +97,18 @@ public class AudioPointControllerEditor : Editor
                 EditorGUILayout.EndVertical();
             }
     }
+    
+    void DrawMiscSetup() 
+    {
+        m_target.m_miscSettingsFoldout = EditorGUILayout.Foldout(m_target.m_miscSettingsFoldout, "Other settings");
+        using (new EditorGUI.IndentLevelScope())
+            if (m_target.m_miscSettingsFoldout)
+            {
+                EditorGUILayout.BeginVertical();
+                m_target.m_globalPositionOffset = EditorGUILayout.Vector3Field("Global offset: ", m_target.m_globalPositionOffset);
+                EditorGUILayout.EndVertical();
+            }
+    }
 
     void DrawAddControlPointButton()
     {
@@ -150,7 +163,16 @@ public class AudioPointControllerEditor : Editor
         GUIStyle header = new GUIStyle();
         header.richText = true;
         header.alignment = TextAnchor.LowerCenter;
-        GUILayout.Label($"<size=15><color=#eeeeee><b>{acpoint.m_fmodParameter}</b></color></size>", header);
+        //draw title text, either fmod parameter or osc command path
+        if (acpoint.m_controlType == ControlDataType.FMODEvent)
+        {
+            GUILayout.Label($"<size=15><color=#eeeeee><b>{acpoint.m_fmodParameter}</b></color></size>", header);    
+        }
+        if (acpoint.m_controlType == ControlDataType.OSC)
+        {
+            GUILayout.Label($"<size=15><color=#eeeeee><b>{acpoint.m_oscCommand}</b></color></size>", header);    
+        }
+        
         EditorGUILayout.Space(25);
         
         acpoint.m_active = (bool)EditorGUILayout.Toggle(acpoint.m_active);
@@ -186,13 +208,21 @@ public class AudioPointControllerEditor : Editor
             }
 
             EditorGUILayout.Space(25);
-            EditorGUILayout.BeginHorizontal();
-            acpoint.m_visualizeBonePoint = EditorGUILayout.Toggle("Show joint (scene only)", acpoint.m_visualizeBonePoint);
-            GUILayout.FlexibleSpace();
-            acpoint.m_drawColor = EditorGUILayout.ColorField("Color", acpoint.m_drawColor);
-            EditorGUILayout.EndHorizontal();
+
+            if (acpoint.m_controlType == ControlDataType.FMODEvent)
+            {
+                EditorGUILayout.BeginHorizontal();
+                acpoint.m_visualizeBonePoint =
+                    EditorGUILayout.Toggle("Show joint (scene only)", acpoint.m_visualizeBonePoint);
+                // GUILayout.FlexibleSpace();
+                // acpoint.m_drawColor = EditorGUILayout.ColorField("Color", acpoint.m_drawColor);
+                EditorGUILayout.EndHorizontal();
+            }
+
             EditorGUILayout.BeginHorizontal();
             acpoint.m_showValue = EditorGUILayout.Toggle("Show value", acpoint.m_showValue);
+            GUILayout.FlexibleSpace();
+            acpoint.m_drawColor = EditorGUILayout.ColorField("Color", acpoint.m_drawColor);
             EditorGUILayout.EndHorizontal();
             if (GUILayout.Button("Reset min/max"))
             {
@@ -263,7 +293,7 @@ public class AudioPointControllerEditor : Editor
     }
 
 
-    //to visualize data on scenen view
+    //to visualize data on scene view
     void OnSceneGUI()
     {
         if (m_target != null)
@@ -283,9 +313,9 @@ public class AudioPointControllerEditor : Editor
                     GUI.backgroundColor = acpoint.m_drawColor;
                     GUILayout.BeginHorizontal();
                     GUILayout.Box(_labelTextureStorage[acpoint.m_drawColor]);
-                    GUILayout.Box("Value for " + acpoint.m_argumentType.ToString() + ": " + acpoint.ControlPointDataValue.ToString("F2"), GUILayout.Width(160));
-                    GUILayout.Box("min: " + acpoint.minVal.ToString("F2"), GUILayout.Width(80));
-                    GUILayout.Box("max " + acpoint.maxVal.ToString("F2"), GUILayout.Width(80));
+                    GUILayout.Box("Value for " + acpoint.m_argumentType.ToString() + ": " + acpoint.ControlPointDataValue.ToString("F2"),GUILayout.Width(160));
+                    GUILayout.Box("min: " + acpoint.minVal.ToString("F2"),GUILayout.Width(80));
+                    GUILayout.Box("max " + acpoint.maxVal.ToString("F2"),GUILayout.Width(80));
                     GUILayout.EndHorizontal();
                     Handles.EndGUI();
                 }
@@ -293,6 +323,7 @@ public class AudioPointControllerEditor : Editor
 
         }
     }
+    
 
     private void OnDisable()
     {

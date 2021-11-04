@@ -25,6 +25,7 @@ namespace SoundActor
         public Vector3 frameVelocity = Vector3.zero;
         public float positionOnSelectedAxis = 0f;
         public float distanceBetweenPoints = 0f;
+        public Vector3 m_positionOffset = Vector3.zero;
 
         private float _controlPointDataValue;
         public float ControlPointDataValue {

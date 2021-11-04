@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using FMOD;
 using FMOD.Studio;
 using UnityEngine;
@@ -32,6 +33,8 @@ namespace SoundActor
         [HideInInspector]
         public bool m_controlPointsFoldout = true;
         [HideInInspector]
+        public bool m_miscSettingsFoldout = false;
+        [HideInInspector]
         public List<AudioControlPoint> controlPoints = new List<AudioControlPoint>();
         [HideInInspector]
         public Animator animator;
@@ -45,6 +48,8 @@ namespace SoundActor
         public string m_startSignalName;
         [HideInInspector]
         public string m_stopSignalName;
+        [HideInInspector]
+        public Vector3 m_globalPositionOffset = Vector3.zero;
 
         private float _lastExecTime = 0f;
         private float _timeThreshold;
@@ -93,7 +98,8 @@ namespace SoundActor
 
             if (debugMode && (controlPoints!= null) && (controlPoints.Count > 0) )
             {
-                Debug.Log("Currently " + controlPoints.Count.ToString() + " parameter control points attached to " + gameObject.name + " for fmod instrument " + fmodEvent.Split('/')[1]);
+                //Debug.Log("Currently " + controlPoints.Count.ToString() + " parameter control points attached to " + gameObject.name + " for fmod instrument " + fmodEvent.Split('/')[1]);
+                Debug.Log("Currently " + controlPoints.Count.ToString() + " parameter control points attached to " + gameObject.name );
             }
         }
 
@@ -178,19 +184,19 @@ namespace SoundActor
                 switch (acp.m_axis)
                 {
                     case Axis.x:
-                        value = transform.position.x;
+                        value = transform.position.x - m_globalPositionOffset.x;
                         acp.positionOnSelectedAxis = value; //store the result into instance for reuse in other parts of GUI drawing
                         //acp.fmodParameterValue = Mathf.Abs(value);
                         acp.ControlPointDataValue = value;
                         break;
                     case Axis.y:
-                        value = transform.position.y;
+                        value = transform.position.y - m_globalPositionOffset.y;
                         acp.positionOnSelectedAxis = value;
                         //acp.fmodParameterValue = Mathf.Abs(value);
                         acp.ControlPointDataValue = value;
                         break;
                     case Axis.z:
-                        value = transform.position.z;
+                        value = transform.position.z - m_globalPositionOffset.z;
                         acp.positionOnSelectedAxis = value;
                         //acp.fmodParameterValue = Mathf.Abs(value);
                         acp.ControlPointDataValue = value;
@@ -254,12 +260,13 @@ namespace SoundActor
 
         private void SendData(Dictionary<string,List<AudioControlPoint>> pointDict)
         {
+            //
             foreach (KeyValuePair<string,List<AudioControlPoint>> entry in pointDict)
             {
                 var attributeOrCommand = entry.Key;
                 var size = entry.Value.Count;
-                float cumulativeValue = 0f;
-                float maxValue = 0f;
+                float averageValue = 0f;
+                float maxValue = -10000f;
                 foreach (var point in entry.Value)
                 {
                     //update value based on object type acp is linked to
@@ -272,12 +279,12 @@ namespace SoundActor
                         UpdateValueGameObject(point);
                     }
                     
-                    cumulativeValue += point.ControlPointDataValue;
+                    averageValue += point.ControlPointDataValue;
                     maxValue = point.ControlPointDataValue > maxValue ? point.ControlPointDataValue : maxValue;
                 }
-                
+
                 //determine the final value for output
-                float outValue = m_outputChoice == OutputChoice.MaxValue ? maxValue : cumulativeValue / size;
+                float outValue = m_outputChoice == OutputChoice.MaxValue ? maxValue : averageValue / size;
                 
                 //FMOD or OSC
                 if (Application.isPlaying)  //so we are not sending data while in edit
@@ -287,7 +294,18 @@ namespace SoundActor
                         FMOD.RESULT _result = _instance.setParameterByName(attributeOrCommand, outValue);    
                     } else if (entry.Value[0].m_controlType == ControlDataType.OSC)
                     {
-                        _client.Send(attributeOrCommand, outValue); 
+                        try
+                        {
+                            _client.Send(attributeOrCommand, outValue);
+                        }
+                        catch (SocketException ex)
+                        {
+                            if (ex.SocketErrorCode == SocketError.ConnectionRefused)
+                            {   
+                                Debug.Log("Destination address and port are not listening. Check the ip and port number.");
+                            }
+                        }
+                         
                     }
                 }
             }
@@ -301,6 +319,8 @@ namespace SoundActor
                 //this is inefficient as we start from beginning on each update loop, but it doesn't matter now in this context
                 //create audio control point groupings based on point's current fmod attribute or OSC command
                 //use own list for each type, fmod or osc
+                //all this is done to handle cases where we have multiple control points to control one and same fmod attribute or osc command
+                //on these we can use aggregate calculations to have the final output value from multiple points to one control
                 if (acp.m_controlType == ControlDataType.FMODEvent)
                 {
                     //is this first occurrance of this fmod attribute as a key in dict
