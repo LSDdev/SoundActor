@@ -5,18 +5,8 @@
   "unity": "2019.3",
   "keywords": [],
   "description": "Tools to control FMOD or other OSC enabled sound sources from humanoid rig",
-  "scopedRegistries": [
-    {
-      "name": "Keijiro",
-      "url": "https://registry.npmjs.com",
-      "scopes": [
-        "jp.keijiro"
-      ]
-    }
-  ],
   "dependencies": {
-    "fi.uniarts.lsd.core": "https://github.com/LSDdev/CoreUtilities.git#1.0.0",
-    "jp.keijiro.osc-jack": "1.0.3"
+    "fi.uniarts.lsd.core": "https://github.com/LSDdev/CoreUtilities.git#1.0.0"
   },
   "relatedPackages":{}
 }
