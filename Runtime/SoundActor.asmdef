@@ -2,7 +2,8 @@
     "name": "SoundActor",
     "references": [
         "FMODUnity",
-        "OscJack.Runtime"
+        "OscJack.Runtime",
+        "Uniarts"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

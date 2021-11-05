@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Uniarts;
 
 namespace SoundActor
 {
@@ -26,11 +27,21 @@ namespace SoundActor
         public float positionOnSelectedAxis = 0f;
         public float distanceBetweenPoints = 0f;
         public Vector3 m_positionOffset = Vector3.zero;
+        public float m_inMin = 0f;
+        public float m_outMin = 0f;
+        public float m_inMax = 0f;
+        public float m_outMax = 0f;
+        public bool m_useScaling = false;
+        public bool m_clampScaling = false;
 
         private float _controlPointDataValue;
         public float ControlPointDataValue {
             get { return _controlPointDataValue; }
             set { _controlPointDataValue = value;
+                if (m_useScaling)
+                {
+                    _controlPointDataValue = (float)Uniarts.LsdUtility.Map(value, m_inMin, m_inMax, m_outMin, m_outMax, m_clampScaling);
+                }
                 if(_controlPointDataValue < minVal)
                 {
                     minVal = _controlPointDataValue;

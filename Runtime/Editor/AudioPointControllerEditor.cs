@@ -43,6 +43,7 @@ public class AudioPointControllerEditor : Editor
         GUIStyle header = new GUIStyle();
         header.richText = true;
         header.alignment = TextAnchor.LowerCenter;
+        
         EditorGUILayout.BeginHorizontal();
         if (!String.IsNullOrEmpty(m_target.fmodEvent))
         {
@@ -142,10 +143,11 @@ public class AudioPointControllerEditor : Editor
         
         //this is bit hacky bit otherwise texture garbage keeps piling up until playmode is exited
         if (!_inspectorTextureStorage.ContainsKey("drawControlPoint"))
-        {
-            _inspectorTextureStorage["drawControlPoint"] = MakeTex(600, 1, new Color(1.0f, 1.0f, 1.0f, 0.3f));
-        }
-        cpStyle.normal.background = _inspectorTextureStorage["drawControlPoint"];
+        // {
+        //     _inspectorTextureStorage["drawControlPoint"] = MakeTex(1, 1, new Color(0.0f, 0.0f, 1.0f, 0.0f));
+        // }
+        //cpStyle.normal.background = _inspectorTextureStorage["drawControlPoint"];  //this works in strange ways
+        GUI.backgroundColor = new Color(0.0f, 0.7f, 1.0f, 1.0f);            //this works better
         EditorGUILayout.BeginVertical(cpStyle);
         
         EditorGUILayout.Space(5);
@@ -228,6 +230,47 @@ public class AudioPointControllerEditor : Editor
             {
                 acpoint.ResetMinMax();
             }
+            
+            EditorGUILayout.BeginHorizontal();
+            acpoint.m_useScaling = EditorGUILayout.Toggle("Scale output value", acpoint.m_useScaling);
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.BeginHorizontal();
+                if (acpoint.m_useScaling) {
+                    EditorGUILayout.BeginVertical();
+                        EditorGUILayout.BeginHorizontal();
+                            GUILayout.Space(10);
+                            GUILayout.Label("min input value", GUILayout.Width(75));
+                            acpoint.m_inMin = (float)EditorGUILayout.FloatField("", acpoint.m_inMin, GUILayout.Width(30));
+                            GUILayout.Space(0);
+                            GUILayout.Label("maps to ->", GUILayout.Width(75));
+                            acpoint.m_outMin = (float)EditorGUILayout.FloatField("", acpoint.m_outMin,GUILayout.Width(30));
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.BeginHorizontal();
+                            GUILayout.Space(10);
+                            GUILayout.Label("max input value", GUILayout.Width(75));
+                            acpoint.m_inMax =(float)EditorGUILayout.FloatField("", acpoint.m_inMax, GUILayout.Width(30));
+                            GUILayout.Space(0);
+                            GUILayout.Label("maps to ->", GUILayout.Width(75));
+                            acpoint.m_outMax = (float)EditorGUILayout.FloatField("", acpoint.m_outMax, GUILayout.Width(30));
+                        EditorGUILayout.EndHorizontal();
+                        
+                        EditorGUILayout.BeginHorizontal();
+                            GUILayout.Space(10);
+                            acpoint.m_clampScaling = EditorGUILayout.Toggle("Clamp scaled output", acpoint.m_clampScaling);
+                        EditorGUILayout.EndHorizontal();
+                        
+                    EditorGUILayout.EndVertical();
+
+                    // EditorGUILayout.BeginVertical();
+                    // EditorGUILayout.BeginHorizontal();
+                    // acpoint.m_inMax = (float)EditorGUILayout.FloatField("max in val:", acpoint.m_inMax);
+                    // acpoint.m_outMax = (float)EditorGUILayout.FloatField("max out val:", acpoint.m_outMax);
+                    // EditorGUILayout.EndHorizontal();
+                    // EditorGUILayout.EndVertical();
+                }
+            EditorGUILayout.EndHorizontal();
+            
             EditorGUILayout.EndVertical();
         }
         EditorGUILayout.EndVertical();

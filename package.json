@@ -1,10 +1,10 @@
 {
   "name": "fi.uniarts.soundactor",
   "displayName": "Humanoid rig sound control",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "unity": "2019.3",
   "keywords": [],
   "description": "Tools to control FMOD or other OSC enabled sound sources from humanoid rig",
-  "dependencies": {},
+  "dependencies": {"fi.uniarts.lsd.core": "https://github.com/LSDdev/CoreUtilities.git"},
   "relatedPackages":{}
 }
