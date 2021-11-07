@@ -20,19 +20,54 @@ When used on regular game object all the same applies with the obvious differenc
 
 ## Step 1
 
-Add this into your project's package manifest 
+Add needed registries and scopes into your project's package manifest (Packages/manifest.json). 
 
-```` json
-"fi.uniarts.soundactor": "https://github.com/LSDdev/SoundActor.git"
-````
+To the `scopedRegistries` section:
+
+``` json
+"scopedRegistries": [
+    {
+      "name": "Uniarts",
+      "url": "https://registry.npmjs.com",
+      "scopes": [ "fi.uniarts" ]
+    },
+    {
+      "name": "Keijiro",
+      "url": "https://registry.npmjs.com",
+      "scopes": [ "jp.keijiro" ]
+    }
+  ],
+```
+
+To the `dependencies` section:
+
+``` json
+"fi.uniarts.soundactor": "1.1.0"
+```
+
+After changes, the manifest file should look like below:
+
+``` json
+{
+  "scopedRegistries": [
+    {
+      "name": "Uniarts",
+      "url": "https://registry.npmjs.com",
+      "scopes": [ "fi.uniarts" ]
+    },
+    {
+      "name": "Keijiro",
+      "url": "https://registry.npmjs.com",
+      "scopes": [ "jp.keijiro" ]
+    }
+  ],
+  "dependencies": {
+    "fi.uniarts.soundactor": "1.1.0",
+    ...
+```
 
 ## Step 2
 You also need to setup the FMOD Unity integration, which you can get from www.fmod.com (requires free account) or from [Asset Store](https://assetstore.unity.com/packages/tools/audio/fmod-for-unity-161631).
-
-
-## Step 3
-
-You need also to install the OscJack package from Keijiro, follow the instructions here [https://github.com/keijiro/OscJack](https://github.com/keijiro/OscJack) 
 
 ---
 

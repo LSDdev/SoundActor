@@ -6,7 +6,8 @@
   "keywords": [],
   "description": "Tools to control FMOD or other OSC enabled sound sources from humanoid rig",
   "dependencies": {
-    "fi.uniarts.lsd.core": "1.0.0"
+    "fi.uniarts.lsd.core": "1.0.0",
+    "jp.keijiro.osc-jack": "1.0.3"
   },
   "relatedPackages": {}
 }
