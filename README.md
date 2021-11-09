@@ -42,7 +42,7 @@ To the `scopedRegistries` section:
 To the `dependencies` section:
 
 ``` json
-"fi.uniarts.soundactor": "1.1.0"
+"fi.uniarts.soundactor": "1.1.1"
 ```
 
 After changes, the manifest file should look like below:
@@ -62,7 +62,7 @@ After changes, the manifest file should look like below:
     }
   ],
   "dependencies": {
-    "fi.uniarts.soundactor": "1.1.0",
+    "fi.uniarts.soundactor": "1.1.1",
     ...
 ```
 
