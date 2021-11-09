@@ -1,10 +1,16 @@
 {
   "name": "fi.uniarts.soundactor",
   "displayName": "Humanoid rig sound control",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "unity": "2019.3",
   "keywords": [],
   "description": "Tools to control FMOD or other OSC enabled sound sources from humanoid rig",
+  "license": "MIT-Modern-Variant",
+  "author": {
+    "name": "Uniarts",
+    "email": "jokke.heikkila@uniarts.fi",
+    "url": "http://www.uniarts.fi"
+  },
   "dependencies": {
     "fi.uniarts.lsd.core": "1.0.0",
     "jp.keijiro.osc-jack": "1.0.3"
