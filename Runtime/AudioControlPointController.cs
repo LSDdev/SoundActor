@@ -369,6 +369,7 @@ namespace SoundActor
                 }
                 if (acp.m_visualizeBonePoint && acp.m_argumentType == ArgumentType.Distance && acp.m_active)
                 {
+                    //highlight bonepoint on humanoid, draw bezier on distance of that is the tracked attribute 
                     Vector3 p1, p2 = Vector3.zero;
                     Gizmos.color = acp.m_drawColor;
 
@@ -380,6 +381,7 @@ namespace SoundActor
                     {
                         p1 = transform.position;
                     }
+                    
                     Gizmos.DrawSphere(p1, .03f);
                     
                     if (acp.m_distanceTo == DistanceTo.ThisToJoint)

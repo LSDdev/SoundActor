@@ -155,12 +155,8 @@ public class AudioPointControllerEditor : Editor
         EditorGUILayout.BeginHorizontal();
         GUI.backgroundColor = Color.white;
         GUILayout.Label("Control", EditorStyles.label);
-        acpoint.m_controlType  = (ControlDataType)EditorGUILayout.EnumPopup(acpoint.m_controlType); 
-        // EditorGUI.BeginChangeCheck();
-        // if(EditorGUI.EndChangeCheck())
-        // {
-        // }
-        
+        acpoint.m_controlType  = (ControlDataType)EditorGUILayout.EnumPopup(acpoint.m_controlType);
+
         EditorGUILayout.Space(15);
         GUIStyle header = new GUIStyle();
         header.richText = true;
@@ -211,13 +207,17 @@ public class AudioPointControllerEditor : Editor
 
             EditorGUILayout.Space(25);
 
-            if (acpoint.m_controlType == ControlDataType.FMODEvent)
+            if (acpoint.m_controlPointType == ControlPointType.Humanoid)
             {
                 EditorGUILayout.BeginHorizontal();
                 acpoint.m_visualizeBonePoint =
-                    EditorGUILayout.Toggle("Show joint (scene only)", acpoint.m_visualizeBonePoint);
-                // GUILayout.FlexibleSpace();
-                // acpoint.m_drawColor = EditorGUILayout.ColorField("Color", acpoint.m_drawColor);
+                    EditorGUILayout.Toggle("Draw joint (and distance)", acpoint.m_visualizeBonePoint);
+                EditorGUILayout.EndHorizontal();
+            } else if (acpoint.m_controlPointType == ControlPointType.GameObject)
+            {
+                EditorGUILayout.BeginHorizontal();
+                acpoint.m_visualizeBonePoint =
+                    EditorGUILayout.Toggle("Draw distance line", acpoint.m_visualizeBonePoint);
                 EditorGUILayout.EndHorizontal();
             }
 
