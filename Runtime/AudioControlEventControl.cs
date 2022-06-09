@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿/* Event signaling pattern, the trigger part to be attached on GameObject to trigger sound control point controller */
+using UnityEngine;
 
 public class AudioControlEventControl : MonoBehaviour
 {

@@ -68,6 +68,7 @@ namespace SoundActor
         }
 
         private void OnEnable() {
+            // using Unity Event pattern, we can register for specific event and have starting and stopping of FMOD instance depend on these
             if (m_startMode == StartMode.Triggered && !String.IsNullOrEmpty(m_startSignalName))
             {
                 EventSignaling.StartListening(m_startSignalName, StartFMOD);    
@@ -85,6 +86,7 @@ namespace SoundActor
             {
                 //need to have shared instance pointing to fmod event between possible multiple audiopointcontroller
                 _instance = FMODEventInstancer.instance.GetFmodEventInstance(fmodEvent);
+                // unless in triggered start mode, start the timeline in FMOD
                 if(m_startMode == StartMode.Automatic) { StartFMOD(); }
             }
 

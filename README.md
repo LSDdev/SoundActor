@@ -20,54 +20,31 @@ When used on regular game object all the same applies with the obvious differenc
 
 ## Step 1
 
-Add needed registries and scopes into your project's package manifest (Packages/manifest.json). 
+Add needed registries and scopes into your project's package manifest (Packages/manifest.json).  For Unity > 2021.x.x this is easily done through project settings.
 
-To the `scopedRegistries` section:
+<img src="https://user-images.githubusercontent.com/16014157/172593003-00f516b1-bba3-4c3d-b468-93165cdbce2a.jpg" width="700">
 
-``` json
-"scopedRegistries": [
-    {
-      "name": "Uniarts",
-      "url": "https://registry.npmjs.com",
-      "scopes": [ "fi.uniarts" ]
-    },
-    {
-      "name": "Keijiro",
-      "url": "https://registry.npmjs.com",
-      "scopes": [ "jp.keijiro" ]
-    }
-  ],
-```
+Use these for the entries:
 
-To the `dependencies` section:
+**Uniarts**:<br>
+Name: uniarts<br>
+URL: https://registry.npmjs.com<br>
+Scope: fi.uniarts<br>
 
-``` json
-"fi.uniarts.soundactor": "1.1.1"
-```
 
-After changes, the manifest file should look like below:
 
-``` json
-{
-  "scopedRegistries": [
-    {
-      "name": "Uniarts",
-      "url": "https://registry.npmjs.com",
-      "scopes": [ "fi.uniarts" ]
-    },
-    {
-      "name": "Keijiro",
-      "url": "https://registry.npmjs.com",
-      "scopes": [ "jp.keijiro" ]
-    }
-  ],
-  "dependencies": {
-    "fi.uniarts.soundactor": "1.1.1",
-    ...
-```
+**Keijiro**:<br>
+Name: keijiro<br>
+URL: https://registry.npmjs.com<br>
+Scope: jp.keijiro<br>
+
+After adding the above, from Unity's package manager install 'Humanoid Rig Sound Control'.
+
+ <img src="https://user-images.githubusercontent.com/16014157/172594079-f97cbb44-2b21-43e1-a7bd-a7494cd10617.jpg" width="700">
+
 
 ## Step 2
-You also need to setup the FMOD Unity integration, which you can get from www.fmod.com (requires free account) or from [Asset Store](https://assetstore.unity.com/packages/tools/audio/fmod-for-unity-161631).
+You also need to install and setup the FMOD Unity integration, which you can get from www.fmod.com (requires free account) or from [Asset Store](https://assetstore.unity.com/packages/tools/audio/fmod-for-unity-161631).
 
 ---
 

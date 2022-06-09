@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿/* Event signaling pattern that enables audio control points to register as a listener for arbitrarily named
+ signal and have their FMOD references start/stop according to trigger */
+
+using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
