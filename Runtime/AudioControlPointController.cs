@@ -19,7 +19,7 @@ namespace SoundActor
         [HideInInspector]
         public string fmodEvent;
         [HideInInspector]
-        public string oscAddress;
+        public string oscAddress = "127.0.0.1";
         [HideInInspector]
         public int oscPort = 9200;
         [HideInInspector]
@@ -254,8 +254,11 @@ namespace SoundActor
             if (Time.time - _lastExecTime > _timeThreshold)   //throttle the data output
             {
                 IterateControlPoints();
-                SendData(_fmodPointsByAttribute);
-                SendData(_oscPointsByCommand);
+                if (Application.isPlaying)
+                {
+                    SendData(_fmodPointsByAttribute);
+                    SendData(_oscPointsByCommand);    
+                }
                 _lastExecTime = Time.time;
             }
         }
