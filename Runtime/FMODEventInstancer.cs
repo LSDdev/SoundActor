@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.WebPages;
 using FMOD;
 using FMOD.Studio;
 
@@ -51,7 +52,7 @@ public sealed class FMODEventInstancer
 
     public void ReleaseFmodInstance(string eventName)
     {
-        if (_instances.Keys.Contains(eventName))
+        if (!eventName.IsEmpty() && _instances.Count > 0 && _instances.Keys.Contains(eventName))
         {
             var eventInstance = _instances[eventName];
             eventInstance.release();

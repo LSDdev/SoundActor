@@ -376,7 +376,7 @@ public class AudioPointControllerEditor : Editor
         }
         catch (Exception e)
         {
-            Debug.LogException(e, this);
+            //Debug.LogException(e, this);
         }
         
         try
@@ -385,7 +385,7 @@ public class AudioPointControllerEditor : Editor
         }
         catch (Exception e)
         {
-            Debug.LogException(e, this);
+            //Debug.LogException(e, this);
         }
     }
 }
